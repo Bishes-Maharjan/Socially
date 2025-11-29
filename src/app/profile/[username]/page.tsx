@@ -5,11 +5,11 @@ import {
   getUserLikedPosts,
   getUserPosts,
   isFollowing,
-} from '@/actions/profile.action';
-import { getUserByClerkId } from '@/actions/user.action';
-import ProfilePageClient from '@/app/profile/[username]/ProfilePageClient';
-import { currentUser } from '@clerk/nextjs/server';
-import { notFound } from 'next/navigation';
+} from "@/actions/profile.action";
+import { getUserByClerkId } from "@/actions/user.action";
+import ProfilePageClient from "@/app/profile/[username]/ProfilePageClient";
+import { currentUser } from "@clerk/nextjs/server";
+import { notFound } from "next/navigation";
 
 export async function generateMetadata({
   params,
@@ -33,10 +33,10 @@ async function ProfilePageServer({
 }) {
   const { username } = await params;
 
-  const clerkUser = (await currentUser()) || { id: '123' };
+  const clerkUser = (await currentUser()) || { id: "123" };
 
-  const dbUser = await getUserByClerkId(clerkUser.id);
-  if (!dbUser) return;
+  const dbUser = clerkUser ? await getUserByClerkId(clerkUser.id) : null;
+
   const user = await getProfileByUsername(username);
   if (!user) notFound();
 

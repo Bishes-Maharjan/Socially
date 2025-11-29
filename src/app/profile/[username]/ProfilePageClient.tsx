@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   followingAndFollower,
@@ -6,27 +6,27 @@ import {
   getProfileByUsername,
   getUserPosts,
   updateProfile,
-} from '@/actions/profile.action';
-import { getUserByClerkId, toggleFollow } from '@/actions/user.action';
-import PostCard from '@/components/PostCard';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+} from "@/actions/profile.action";
+import { getUserByClerkId, toggleFollow } from "@/actions/user.action";
+import PostCard from "@/components/PostCard";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { SignInButton, useUser } from '@clerk/nextjs';
-import { format } from 'date-fns';
-import { motion } from 'framer-motion';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { SignInButton, useUser } from "@clerk/nextjs";
+import { format } from "date-fns";
+import { motion } from "framer-motion";
 import {
   CalendarIcon,
   EditIcon,
@@ -34,17 +34,17 @@ import {
   HeartIcon,
   LinkIcon,
   MapPinIcon,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 type dbUser = Awaited<ReturnType<typeof getUserByClerkId>>;
 type User = Awaited<ReturnType<typeof getProfileByUsername>>;
 type Posts = Awaited<ReturnType<typeof getUserPosts>>;
 type Follower = Awaited<ReturnType<typeof followingAndFollower>>;
 type MyFollowingIds = Awaited<ReturnType<typeof getMyFollowingIds>>;
 interface ProfilePageClientProps {
-  dbUser: NonNullable<dbUser>;
+  dbUser: dbUser | null;
   user: NonNullable<User>;
   posts: Posts;
   likedPosts: Posts;
@@ -71,18 +71,18 @@ function ProfilePageClient({
   const [isFollowing, setIsFollowing] = useState(initialFollowing);
   const [isUpdatingFollow, setIsUpdatingFollow] = useState(false);
   const [isUpdatingDialogFollow, setIsUpdatingDialogFollow] = useState(false);
-  const [activeTab, setActiveTab] = useState('following');
+  const [activeTab, setActiveTab] = useState("following");
   const [followingOrFollower, setFollowingOrFollower] = useState(following);
 
   const [editForm, setEditForm] = useState({
-    name: user.name || '',
-    bio: user.bio || '',
-    location: user.location || '',
-    website: user.website || '',
+    name: user.name || "",
+    bio: user.bio || "",
+    location: user.location || "",
+    website: user.website || "",
   });
 
   const [toastState, setToastState] = useState<
-    null | 'followed' | 'unfollowed'
+    null | "followed" | "unfollowed"
   >(null);
 
   const handleEditSubmit = async () => {
@@ -93,7 +93,7 @@ function ProfilePageClient({
     const result = await updateProfile(formData);
     if (result.success) {
       setShowEditDialog(false);
-      toast.success('Profile updated successfully');
+      toast.success("Profile updated successfully");
     }
   };
   const handleFollow = async () => {
@@ -102,10 +102,10 @@ function ProfilePageClient({
     try {
       setIsUpdatingFollow(true);
       await toggleFollow(user.id);
-      isFollowing ? toast.success('Unfollowed') : toast.success('Followed');
+      isFollowing ? toast.success("Unfollowed") : toast.success("Followed");
       setIsFollowing(!isFollowing);
     } catch (error) {
-      toast.error('Failed to update follow status');
+      toast.error("Failed to update follow status");
     } finally {
       setIsUpdatingFollow(false);
     }
@@ -116,7 +116,7 @@ function ProfilePageClient({
   );
 
   const handleDialogFollow = async (userId: string) => {
-    if (!currentUser) return;
+    if (!currentUser || !dbUser) return;
 
     try {
       setIsUpdatingDialogFollow(true);
@@ -126,15 +126,15 @@ function ProfilePageClient({
         const updated = new Set(prev);
         if (updated.has(userId)) {
           updated.delete(userId);
-          setToastState('unfollowed');
+          setToastState("unfollowed");
         } else {
           updated.add(userId);
-          setToastState('followed');
+          setToastState("followed");
         }
         return updated;
       });
     } catch (error) {
-      toast.error('Failed to update follow status');
+      toast.error("Failed to update follow status");
     } finally {
       setIsUpdatingDialogFollow(false);
     }
@@ -142,15 +142,15 @@ function ProfilePageClient({
 
   useEffect(() => {
     if (!toastState) return;
-    toast.success(toastState === 'followed' ? 'Followed' : 'Unfollowed');
+    toast.success(toastState === "followed" ? "Followed" : "Unfollowed");
     setToastState(null);
   }, [toastState]);
 
   const isOwnProfile =
     currentUser?.username == user.name ||
-    currentUser?.emailAddresses[0].emailAddress.split('@')[0] === user.username;
+    currentUser?.emailAddresses[0].emailAddress.split("@")[0] === user.username;
 
-  const formattedDate = format(new Date(user.createdAt), 'MMM yyyy');
+  const formattedDate = format(new Date(user.createdAt), "MMM yyyy");
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -160,7 +160,7 @@ function ProfilePageClient({
             <CardContent className="pt-6">
               <div className="flex flex-col items-center text-center">
                 <Avatar className="w-24 h-24">
-                  <AvatarImage src={user.image ?? '/avatar.png'} />
+                  <AvatarImage src={user.image ?? "/avatar.png"} />
                 </Avatar>
                 <h1 className="mt-4 text-2xl font-bold">
                   {user.name ?? user.username}
@@ -173,10 +173,10 @@ function ProfilePageClient({
                   <div className="flex justify-between mb-4">
                     <div>
                       <Button
-                        variant={'ghost'}
+                        variant={"ghost"}
                         className="flex flex-col items-center hover:bg-transparent focus:bg-transparent active:bg-transparent"
                         onClick={() => {
-                          setActiveTab('following');
+                          setActiveTab("following");
                           setShowFollowerFollowing(true);
                         }}
                       >
@@ -191,10 +191,10 @@ function ProfilePageClient({
                     <Separator orientation="vertical" />
                     <div className=" pr-11 ">
                       <Button
-                        variant={'ghost'}
+                        variant={"ghost"}
                         className="flex flex-col items-centre hover:bg-transparent focus:bg-transparent active:bg-transparent"
                         onClick={() => {
-                          setActiveTab('follower');
+                          setActiveTab("follower");
                           setShowFollowerFollowing(true);
                         }}
                       >
@@ -236,9 +236,9 @@ function ProfilePageClient({
                     className="w-full mt-4"
                     onClick={handleFollow}
                     disabled={isUpdatingFollow}
-                    variant={isFollowing ? 'outline' : 'default'}
+                    variant={isFollowing ? "outline" : "default"}
                   >
-                    {isFollowing ? 'Unfollow' : 'Follow'}
+                    {isFollowing ? "Unfollow" : "Follow"}
                   </Button>
                 )}
 
@@ -255,7 +255,7 @@ function ProfilePageClient({
                       <LinkIcon className="size-4 mr-2" />
                       <a
                         href={
-                          user.website.startsWith('http')
+                          user.website.startsWith("http")
                             ? user.website
                             : `https://${user.website}`
                         }
@@ -400,7 +400,7 @@ function ProfilePageClient({
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>
-                {activeTab == 'following' ? 'Following' : 'Followers'}
+                {activeTab == "following" ? "Following" : "Followers"}
               </DialogTitle>
             </DialogHeader>
 
@@ -411,7 +411,7 @@ function ProfilePageClient({
                     <TabsTrigger
                       value="following"
                       onClick={() => {
-                        setActiveTab('following');
+                        setActiveTab("following");
                         setFollowingOrFollower(following);
                       }}
                       className="flex items-center gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary
@@ -425,7 +425,7 @@ function ProfilePageClient({
                     <TabsTrigger
                       value="follower"
                       onClick={() => {
-                        setActiveTab('follower');
+                        setActiveTab("follower");
                         setFollowingOrFollower(followers);
                       }}
                       className="flex items-center gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary
@@ -454,7 +454,7 @@ function ProfilePageClient({
                           <Link href={`/profile/${otherUser.username}`}>
                             <Avatar>
                               <AvatarImage
-                                src={otherUser.image || '/avatar.png'}
+                                src={otherUser.image || "/avatar.png"}
                               />
                             </Avatar>
                           </Link>
@@ -471,31 +471,32 @@ function ProfilePageClient({
                           </div>
                         </div>
                         <div>
-                          {dbUser.id !== otherUser.id && (
-                            <Button
-                              size="sm"
-                              variant={
-                                followingUserIds.has(otherUser.id)
-                                  ? 'secondary'
-                                  : 'default'
-                              }
-                              onClick={() => handleDialogFollow(otherUser.id)}
-                              disabled={isUpdatingDialogFollow}
-                              className="w-20"
-                            >
-                              {followingUserIds.has(otherUser.id)
-                                ? 'Unfollow'
-                                : 'Follow'}
-                            </Button>
-                          )}
+                          {dbUser &&
+                            dbUser.id !== otherUser.id && ( // Add null check
+                              <Button
+                                size="sm"
+                                variant={
+                                  followingUserIds.has(otherUser.id)
+                                    ? "secondary"
+                                    : "default"
+                                }
+                                onClick={() => handleDialogFollow(otherUser.id)}
+                                disabled={isUpdatingDialogFollow}
+                                className="w-20"
+                              >
+                                {followingUserIds.has(otherUser.id)
+                                  ? "Unfollow"
+                                  : "Follow"}
+                              </Button>
+                            )}
                         </div>
                       </motion.div>
                     ))
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
                       {followingOrFollower == followers
-                        ? 'No Followers'
-                        : 'No Followings'}
+                        ? "No Followers"
+                        : "No Followings"}
                     </div>
                   )}
                 </div>
